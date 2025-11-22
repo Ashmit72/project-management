@@ -1,0 +1,14 @@
+node_modules
+package-lock.json
+yarn.lock
+
+# production
+build
+dist
+.next
+
+# misc
+.env
+.env.local
+coverage
+.DS_Store
