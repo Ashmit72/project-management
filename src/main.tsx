@@ -1,33 +1,44 @@
-import { createRoot } from 'react-dom/client';
-import './index.css';
 import { ThemeProvider } from '@/components/theme-provider.tsx';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { SigninPage } from '@/pages/signin-page.tsx';
-import { RootLayout } from '@/RootLayout';
-import { SignupPage } from '@/pages/signup-page';
-import { ResetpasswordPage } from '@/pages/reset-password-page';
 import { OnboardingPage } from '@/pages/onboarding-page';
+import { ResetpasswordPage } from '@/pages/reset-password-page';
+import { SigninPage } from '@/pages/signin-page.tsx';
+import { SignupPage } from '@/pages/signup-page';
+import AppLayout from '@/AppLayout';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import './index.css';
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <RootLayout />,
-  },
-  {
-    path: '/onboarding',
-    element: <OnboardingPage />,
-  },
-  {
-    path: '/signin',
-    element: <SigninPage />,
-  },
-  {
-    path: '/signup',
-    element: <SignupPage />,
-  },
-  {
-    path: '/reset-password',
-    element: <ResetpasswordPage />,
+    children: [
+      {
+        path: '/',
+        Component: AppLayout,
+        children: [
+          {
+            path: 'onboarding',
+            Component: OnboardingPage,
+          },
+        ],
+      },
+      {
+        path: 'auth',
+        children: [
+          {
+            path: 'signin',
+            Component: SigninPage,
+          },
+          {
+            path: 'signup',
+            Component: SignupPage,
+          },
+          {
+            path: 'reset-password',
+            Component: ResetpasswordPage,
+          },
+        ],
+      },
+    ],
   },
 ]);
 
