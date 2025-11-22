@@ -1,9 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -12,11 +7,18 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
+import Logo from '@/components/Logo';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Spinner } from '@/components/ui/spinner';
-import Logo from '@/components/Logo';
+import { authClient } from '@/lib/authClient';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const FormSchema = z
   .object({
@@ -68,14 +70,20 @@ export function SigninPage() {
       rememberMe: false,
     },
   });
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log(data);
-    setIsLoading(true);
+  const onSubmit = async (payload: z.infer<typeof FormSchema>) => {
+    try {
+      const { error } = await authClient.signIn.email(payload);
 
-    setTimeout(() => {
-      setIsLoading(false);
+      if (error) {
+        toast.error(
+          error.message || "We couldn't sign you in. Please try again."
+        );
+        return;
+      }
       form.reset();
-    }, 2000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -101,7 +109,7 @@ export function SigninPage() {
                 <p className="text-fg-secondary text-sm">
                   Don&apos;t have an account?{' '}
                   <Button asChild variant="link" color="primary">
-                    <Link to="/signup">Sign up</Link>
+                    <Link to="/auth/signup">Sign up</Link>
                   </Button>
                 </p>
               </div>

@@ -1,5 +1,25 @@
-import { Link } from 'react-router-dom';
 import { ThemeToggler } from '@/components/theme-toggler';
+import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { authClient } from '@/lib/authClient';
 import {
   BellRing,
   CircleCheckBig,
@@ -8,79 +28,77 @@ import {
   Sparkles,
   TriangleAlert,
 } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogClose,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+
+type AlertColor =
+  | 'info'
+  | 'error'
+  | 'success'
+  | 'warning'
+  | 'neutral'
+  | 'primary';
+type AlertIconName =
+  | 'Sparkles'
+  | 'OctagonAlert'
+  | 'CircleCheckBig'
+  | 'TriangleAlert';
+type AlertItem = {
+  id: number;
+  color: AlertColor;
+  title: string;
+  icon: AlertIconName;
+};
+
+const alerts: AlertItem[] = [
+  {
+    id: 1,
+    color: 'info',
+    title: 'New update available',
+    icon: 'Sparkles',
+  },
+  {
+    id: 2,
+    color: 'error',
+    title: 'Deployment failed',
+    icon: 'OctagonAlert',
+  },
+  {
+    id: 3,
+    color: 'success',
+    title: 'Payment successful',
+    icon: 'CircleCheckBig',
+  },
+  {
+    id: 4,
+    color: 'warning',
+    title: 'High usage warning',
+    icon: 'TriangleAlert',
+  },
+];
 
 const NavbarMenu = () => {
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const session = authClient.useSession();
   const profile = {
-    name: 'Aurthur Dominic',
+    name: session.data?.user.name,
     avatar: 'https://randomuser.me/api/portraits/men/80.jpg',
-    email: 'dominic@radianos.com',
+    email: session.data?.user.email,
   };
 
-  type AlertColor =
-    | 'info'
-    | 'error'
-    | 'success'
-    | 'warning'
-    | 'neutral'
-    | 'primary';
-  type AlertIconName =
-    | 'Sparkles'
-    | 'OctagonAlert'
-    | 'CircleCheckBig'
-    | 'TriangleAlert';
-  type AlertItem = {
-    id: number;
-    color: AlertColor;
-    title: string;
-    icon: AlertIconName;
+  const signout = async () => {
+    try {
+      setIsSigningOut(true);
+      const { error } = await authClient.signOut();
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+    } finally {
+      setIsSigningOut(false);
+    }
   };
-
-  const alerts: AlertItem[] = [
-    {
-      id: 1,
-      color: 'info',
-      title: 'New update available',
-      icon: 'Sparkles',
-    },
-    {
-      id: 2,
-      color: 'error',
-      title: 'Deployment failed',
-      icon: 'OctagonAlert',
-    },
-    {
-      id: 3,
-      color: 'success',
-      title: 'Payment successful',
-      icon: 'CircleCheckBig',
-    },
-    {
-      id: 4,
-      color: 'warning',
-      title: 'High usage warning',
-      icon: 'TriangleAlert',
-    },
-  ];
 
   return (
     <div className="w-full bg-elevation-level1 px-6 py-2 flex items-center justify-between">
@@ -90,9 +108,9 @@ const NavbarMenu = () => {
       <div className="flex items-center justify-center gap-6">
         <Popover>
           <PopoverTrigger asChild>
-            <Avatar className="cursor-pointer">
+            <Avatar className="cursor-pointer" size={'32'}>
               <AvatarImage src={profile.avatar} />
-              <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{profile.name?.charAt(0)}</AvatarFallback>
             </Avatar>
           </PopoverTrigger>
           <PopoverContent className="flex w-fit flex-col gap-3">
@@ -102,7 +120,7 @@ const NavbarMenu = () => {
             <div className="flex items-center gap-3">
               <Avatar>
                 <AvatarImage src={profile.avatar} />
-                <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback>{profile.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col text-sm">
                 <div className="font-medium">{profile.name}</div>
@@ -110,8 +128,14 @@ const NavbarMenu = () => {
               </div>
             </div>
             <div className="flex gap-3">
-              <Button color="error" className="w-full">
-                Logout
+              <Button
+                color="error"
+                className="w-full"
+                loading={isSigningOut}
+                disabled={isSigningOut}
+                onClick={signout}
+              >
+                {isSigningOut ? 'Logging out' : 'Logout'}
               </Button>
             </div>
           </PopoverContent>

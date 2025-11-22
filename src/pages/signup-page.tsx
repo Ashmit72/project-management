@@ -1,9 +1,5 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useRef, useState } from 'react';
+import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
-import { Input, InputWrapper } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -12,12 +8,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input, InputWrapper } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import Logo from '@/components/Logo';
-import { Link } from 'react-router-dom';
 import { authClient } from '@/lib/authClient';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 const FormSchema = z
   .object({
@@ -78,16 +78,22 @@ export function SignupPage() {
     try {
       console.log(import.meta.env.VITE_FRONTEND_URL);
       setIsLoading(true);
-      const { data, error } = await authClient.signUp.email({
+      const { error } = await authClient.signUp.email({
         ...payload,
-        callbackURL: import.meta.env.VITE_FRONTEND_URL + '/auth/signin',
+        callbackURL:
+          import.meta.env.VITE_FRONTEND_URL +
+          '/auth/signin?email=' +
+          payload.email,
       });
       if (error) {
         toast.error(error.message || 'Something went wrong! Please try again');
         return;
       }
 
-      console.log(data);
+      form.reset();
+      toast.success(
+        'Signup successful. Please check your email for verification.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +112,7 @@ export function SignupPage() {
               <p className="text-fg-secondary text-sm">
                 Already have an account?{' '}
                 <Button asChild variant="link" color="primary">
-                  <Link to="/signin">Sign in</Link>
+                  <Link to="/auth/signin">Sign in</Link>
                 </Button>
               </p>
             </div>

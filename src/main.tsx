@@ -7,6 +7,7 @@ import { SignupPage } from '@/pages/signup-page';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
+import AuthLayout from './layouts/AuthLayout';
 import RootProvider from './providers/RootProvider';
 
 const router = createBrowserRouter([
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'auth',
+        Component: AuthLayout,
         children: [
           {
             path: 'signin',
