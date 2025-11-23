@@ -10,10 +10,11 @@ import {
 } from '@/components/ui/form';
 import { Input, InputWrapper } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { authClient } from '@/lib/authClient';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -22,6 +23,13 @@ import { z } from 'zod';
 const FormSchema = z
   .object({
     name: z.string().trim().nonempty('Full name is required'),
+    username: z
+      .string()
+      .min(3, { message: 'Username must be at least 3 characters long' })
+      .max(20, { message: 'Username must be at most 20 characters long' })
+      .regex(/[A-Za-z][A-Za-z0-9_]{2,19}$/, {
+        message: 'Username can only contain letters, numbers, and underscores',
+      }),
     email: z.string().trim().nonempty('Email is required'),
     password: z
       .string()
@@ -53,6 +61,9 @@ export function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState<
+    boolean | null
+  >(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function togglePasswordVisibility(e: React.MouseEvent) {
@@ -65,18 +76,22 @@ export function SignupPage() {
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    mode: 'onSubmit',
+    mode: 'onChange',
+    disabled: isLoading,
     reValidateMode: 'onChange',
     defaultValues: {
       name: '',
+      username: '',
       email: '',
       password: '',
     },
   });
 
+  const username = form.watch('username');
+  const debouncedUsername = useDebouncedValue(username);
+
   const onSubmit = async (payload: z.infer<typeof FormSchema>) => {
     try {
-      console.log(import.meta.env.VITE_FRONTEND_URL);
       setIsLoading(true);
       const { error } = await authClient.signUp.email({
         ...payload,
@@ -91,6 +106,7 @@ export function SignupPage() {
       }
 
       form.reset();
+      setIsUsernameAvailable(null);
       toast.success(
         'Signup successful. Please check your email for verification.'
       );
@@ -98,6 +114,54 @@ export function SignupPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!debouncedUsername) {
+      form.clearErrors('username');
+      return;
+    }
+
+    if (form.formState.errors.username) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function checkUsernameAvailability() {
+      setIsUsernameAvailable(null);
+
+      const { data, error } = await authClient.isUsernameAvailable({
+        username: debouncedUsername,
+      });
+
+      if (error) {
+        toast.error(
+          error.message ||
+            'Something went wrong while checking username availability.'
+        );
+        return;
+      }
+
+      if (cancelled) return;
+
+      if (!data?.available) {
+        setIsUsernameAvailable(false);
+        form.setError('username', {
+          type: 'manual',
+          message: "Username is't available",
+        });
+      } else {
+        setIsUsernameAvailable(true);
+        form.clearErrors('username');
+      }
+    }
+
+    checkUsernameAvailability();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedUsername, form.setError, form.clearErrors]);
 
   return (
     <div className="h-screen w-screen flex justify-center items-center bg-bg px-5">
@@ -132,6 +196,24 @@ export function SignupPage() {
                           <Input size="36" type="text" {...field} />
                         </FormControl>
                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field, formState: { errors } }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input size="36" type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        {!errors.username && isUsernameAvailable && (
+                          <p className="text-green-600 text-xs">
+                            Username is available
+                          </p>
+                        )}
                       </FormItem>
                     )}
                   />
