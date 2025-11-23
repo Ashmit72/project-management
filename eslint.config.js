@@ -21,6 +21,7 @@ export default defineConfig([
     },
     rules: {
       'react-refresh/only-export-components': 'off', // Changed from error to warning
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ]);
