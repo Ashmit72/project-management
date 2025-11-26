@@ -17,7 +17,7 @@ import Logo from '@/components/Logo';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Spinner } from '@/components/ui/spinner';
 import { authClient } from '@/lib/authClient';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const FormSchema = z
@@ -58,6 +58,7 @@ const FormSchema = z
   });
 
 export function SigninPage() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
 
@@ -73,6 +74,7 @@ export function SigninPage() {
   });
   const onSubmit = async (payload: z.infer<typeof FormSchema>) => {
     try {
+      setIsLoading(true);
       const { error } = await authClient.signIn.email(payload);
 
       if (error) {
@@ -81,7 +83,10 @@ export function SigninPage() {
         );
         return;
       }
-      form.reset();
+
+      navigate('/', {
+        replace: true,
+      });
     } finally {
       setIsLoading(false);
     }

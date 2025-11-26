@@ -6,6 +6,6 @@ export default function AuthLayout() {
   const { data, isPending } = authClient.useSession();
 
   if (isPending) return <Loading overlay />;
-  if (data) return <Navigate to={'/'} />;
+  if (data) return <Navigate to={'/'} replace />;
   return <Outlet />;
 }

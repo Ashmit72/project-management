@@ -7,7 +7,7 @@ const AppLayout = () => {
   const { data, isPending } = authClient.useSession();
 
   if (isPending) return <Loading overlay />;
-  if (!data) return <Navigate to={'/auth/signin'} />;
+  if (!data) return <Navigate to={'/auth/signin'} replace />;
   return (
     <>
       <NavbarMenu />

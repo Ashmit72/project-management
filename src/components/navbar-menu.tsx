@@ -29,7 +29,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 type AlertColor =
@@ -81,6 +81,7 @@ const alerts: AlertItem[] = [
 const NavbarMenu = () => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const session = authClient.useSession();
+  const navigate = useNavigate();
   const profile = {
     name: session.data?.user.name,
     avatar: 'https://randomuser.me/api/portraits/men/80.jpg',
@@ -95,6 +96,9 @@ const NavbarMenu = () => {
         toast.error(error.message);
         return;
       }
+      navigate('/auth/signin', {
+        replace: true,
+      });
     } finally {
       setIsSigningOut(false);
     }
