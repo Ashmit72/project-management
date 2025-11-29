@@ -16,8 +16,6 @@ import SettingsPage from './pages/settings-page';
 import CreateProjectPage from './pages/projects/create-project-page';
 import ProjectBoardPage from './pages/projects/project-board-page';
 
-console.log(import.meta.env.VITE_BACKEND_URL);
-
 const router = createBrowserRouter([
   {
     Component: RootProvider,

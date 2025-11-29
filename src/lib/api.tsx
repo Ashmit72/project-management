@@ -5,6 +5,7 @@ import { ShieldAlert, XIcon } from 'lucide-react';
 
 export const apiBase = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
+  withCredentials: true,
   headers: {
     Accept: 'application/json',
   },
@@ -28,26 +29,30 @@ apiBase.interceptors.response.use(
   },
   error => {
     const status = error?.response?.status;
+    const responseMessage = error?.response?.data?.message;
 
-    // match status from map
-    const message = STATUS_MESSAGES[status];
+    const message = Array.isArray(responseMessage)
+      ? responseMessage[0]
+      : responseMessage || STATUS_MESSAGES[status];
 
     if (message) {
       toast.custom(t => (
         <div className="bg-elevation-level1 border-border flex  items-center justify-between gap-2 rounded-lg border px-3 py-2.5">
           <ShieldAlert className="text-error" size={20} />
           <div className="flex flex-col gap-1">
-            <p className="text-error-text text-sm font-medium">
-              {message.title}
+            <p className="text-sm font-medium text-error-text">
+              {message?.title || message}
             </p>
-            <p className="text-error-text text-sm font-normal">
-              {message.description}
-            </p>
+            {message?.description && (
+              <p className="text-sm font-normal text-error-text">
+                {message.description}
+              </p>
+            )}
           </div>
           <XIcon
             onClick={() => toast.dismiss(t)}
             size={16}
-            className="text-fg-secondary cursor-pointer"
+            className="cursor-pointer text-fg-secondary"
           />
         </div>
       ));
