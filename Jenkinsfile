@@ -12,13 +12,26 @@ pipeline {
   }
 
   stages {
-    stage('Notify Start') {
-      steps {
-        sh """
-        curl -H 'Content-Type: application/json' -X POST -d '{ "content": "⏱ Job Started: ${env.JOB_NAME} #${env.BUILD_NUMBER}" }' $DISCORD_WEBHOOK
-        """
-      }
+   stage('Notify Start') {
+  steps {
+    sh """
+    curl -H 'Content-Type: application/json' -X POST -d '{
+      "content": "**⏱ Build Started**",
+      "embeds": [
+        {
+          "title": "🚧 Pipeline Info",
+          "color": 5814783,
+          "fields": [
+            { "name": "Job", "value": "${env.JOB_NAME}", "inline": true },
+            { "name": "Build", "value": "#${env.BUILD_NUMBER}", "inline": true },
+            { "name": "Branch", "value": "${env.GIT_BRANCH}", "inline": false }
+          ]
+        }
+      ]
+    }' $DISCORD_WEBHOOK
+    """
     }
+}
 
     stage('Checkout') {
       steps {
@@ -52,15 +65,41 @@ pipeline {
   }
 
   post {
-    success {
-      sh """
-      curl -H 'Content-Type: application/json' -X POST -d '{ "content": "✅ Job SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)" }' $DISCORD_WEBHOOK
-      """
-    }
-    failure {
-      sh """
-      curl -H 'Content-Type: application/json' -X POST -d '{ "content": "❌ Job FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)" }' $DISCORD_WEBHOOK
-      """
-    }
+  success {
+    sh """
+    curl -H 'Content-Type: application/json' -X POST -d '{
+      "content": "**✅ Build Succeeded**",
+      "embeds": [
+        {
+          "title": "🎉 Success",
+          "color": 3066993,
+          "fields": [
+            { "name": "Job", "value": "${env.JOB_NAME}", "inline": true },
+            { "name": "Build", "value": "#${env.BUILD_NUMBER}", "inline": true },
+            { "name": "URL", "value": "${env.BUILD_URL}" }
+          ]
+        }
+      ]
+    }' $DISCORD_WEBHOOK
+    """
   }
+  failure {
+    sh """
+    curl -H 'Content-Type: application/json' -X POST -d '{
+      "content": "**❌ Build Failed**",
+      "embeds": [
+        {
+          "title": "🚨 Failure",
+          "color": 15158332,
+          "fields": [
+            { "name": "Job", "value": "${env.JOB_NAME}", "inline": true },
+            { "name": "Build", "value": "#${env.BUILD_NUMBER}", "inline": true },
+            { "name": "URL", "value": "${env.BUILD_URL}" }
+          ]
+        }
+      ]
+    }' $DISCORD_WEBHOOK
+    """
+  }
+}
 }
