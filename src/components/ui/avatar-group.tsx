@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 
 // Utility function to get the initials of a name
 export function getInitials(name: string) {
+  if (!name) return '';
   const parts = name.trim().split(' ');
   if (parts.length === 1) {
     return parts[0][0]?.toUpperCase() ?? '';

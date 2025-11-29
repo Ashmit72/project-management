@@ -27,7 +27,7 @@ export type ProjectCardProps = {
   name: string;
   description: string;
   createdAt: string;
-  members: { name: string; image: string }[];
+  members?: { name: string; image: string }[];
 };
 
 export default function ProjectCard(props: ProjectCardProps) {
@@ -60,11 +60,13 @@ export default function ProjectCard(props: ProjectCardProps) {
             This project was created on {createdAt}
           </TooltipContent>
         </Tooltip>
-        <AvatarGroup
-          avatars={members}
-          size="32"
-          avatarFallbackProps={{ className: 'text-xs' }}
-        />
+        {members && (
+          <AvatarGroup
+            avatars={members}
+            size="32"
+            avatarFallbackProps={{ className: 'text-xs' }}
+          />
+        )}
       </div>
     </div>
   );
