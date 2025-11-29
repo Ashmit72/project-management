@@ -16,6 +16,7 @@ type ProjectCardType = {
 const DashboardPage = () => {
   const { data, isPending } = useQuery<ProjectCardType[]>({
     queryKey: ['projects', 'list'],
+    staleTime: 1000 * 60 * 60, // 1 hour
     queryFn: async () => {
       const res = await apiBase.get<ProjectCardType[]>('/projects');
       return res.data;
