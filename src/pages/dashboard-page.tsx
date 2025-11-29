@@ -1,10 +1,26 @@
 import ProjectCard from '@/components/dashboard/ProjectCard';
 import { Button } from '@/components/ui/button';
-import { dummyProjects } from '@/lib/dummyData';
+import { Spinner } from '@/components/ui/spinner';
+import { apiBase } from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
 import { PlusIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+type ProjectCardType = {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+};
+
 const DashboardPage = () => {
+  const { data, isPending } = useQuery<ProjectCardType[]>({
+    queryKey: ['projects', 'list'],
+    queryFn: async () => {
+      const res = await apiBase.get<ProjectCardType[]>('/projects');
+      return res.data;
+    },
+  });
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-start justify-between gap-y-4 sm:flex-row">
@@ -20,11 +36,15 @@ const DashboardPage = () => {
         </Button>
       </div>
       <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
-        {dummyProjects.map(project => (
-          <Link to={`/projects/${project.id}`}>
-            <ProjectCard {...project} />
-          </Link>
-        ))}
+        {isPending ? (
+          <Spinner />
+        ) : (
+          data?.map(project => (
+            <Link to={`/projects/${project.id}`}>
+              <ProjectCard {...project} />
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );
