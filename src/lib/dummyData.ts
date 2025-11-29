@@ -1,5 +1,16 @@
-export const dummyProjects = [
+type Member = { name: string; image: string };
+
+type RawProject = {
+  id?: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  members: Member[];
+};
+
+const rawProjects: RawProject[] = [
   {
+    id: 'project-id-1',
     name: 'Project – Uber Eats',
     description: 'Mobile app development for the Uber Eats delivery platform.',
     createdAt: 'Dec 2, 2024',
@@ -10,6 +21,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-2',
     name: 'Project – Slack Redesign',
     description:
       'UI overhaul and performance tuning for Slack’s workspace client.',
@@ -21,6 +33,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-3',
     name: 'Project – Netflix Admin',
     description: 'Internal admin dashboard for managing content and analytics.',
     createdAt: 'Feb 9, 2025',
@@ -31,6 +44,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-4',
     name: 'Project – AirBnB Insights',
     description: 'Analytics suite for tracking occupancy and seasonal trends.',
     createdAt: 'Nov 3, 2024',
@@ -41,6 +55,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-5',
     name: 'Project – Stripe Billing',
     description:
       'Custom billing workflows and subscription management features.',
@@ -55,6 +70,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Spotify Social',
     description:
       'Experimental social layer for shared playlists and live rooms.',
@@ -66,6 +82,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Zoom Scheduler',
     description: 'Smart scheduling system integrated with Zoom meetings.',
     createdAt: 'Oct 6, 2024',
@@ -79,6 +96,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – GitHub Deployments',
     description:
       'Unified deployments dashboard tracking multiple environments.',
@@ -99,6 +117,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Notion AI Notes',
     description: 'AI-powered note enhancement and summarization module.',
     createdAt: 'May 19, 2024',
@@ -109,6 +128,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Trello Mobile',
     description: 'Mobile-first enhancements for Trello’s Kanban experience.',
     createdAt: 'Jun 2, 2024',
@@ -122,6 +142,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Figma Assets',
     description: 'Cloud render engine for exporting design assets at scale.',
     createdAt: 'Dec 18, 2024',
@@ -132,6 +153,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Shopify POS',
     description: 'Point-of-sale extensions for retail stores on Shopify.',
     createdAt: 'Jan 5, 2025',
@@ -148,6 +170,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Discord Moderation',
     description: 'Automated moderation and server insights toolkit.',
     createdAt: 'Mar 14, 2024',
@@ -158,6 +181,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Facebook Ads Hub',
     description: 'Unified ad analytics dashboard for different ad sets.',
     createdAt: 'Apr 26, 2024',
@@ -168,6 +192,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – YouTube Studio Mobile',
     description: 'Creator-focused features for YouTube Studio’s mobile app.',
     createdAt: 'Aug 14, 2024',
@@ -181,6 +206,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – LinkedIn Talent Match',
     description: 'AI recommendations for matching candidates at scale.',
     createdAt: 'Nov 20, 2024',
@@ -191,6 +217,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – DoorDash Routing',
     description: 'Smart routing engine for minimizing delivery delays.',
     createdAt: 'Sep 3, 2024',
@@ -204,6 +231,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Canva Pro Assets',
     description: 'Asset management improvements for Canva Pro editors.',
     createdAt: 'Jul 17, 2024',
@@ -217,6 +245,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Pinterest Trends',
     description:
       'Trend forecasting and creator analytics for Pinterest boards.',
@@ -228,6 +257,7 @@ export const dummyProjects = [
     ],
   },
   {
+    id: 'project-id-1',
     name: 'Project – Twitch Highlights',
     description: 'Automatic highlight and clip generator for streamers.',
     createdAt: 'Jan 22, 2025',
@@ -244,3 +274,24 @@ export const dummyProjects = [
     ],
   },
 ];
+
+function generateId(index: number, mode: 'increment' | 'random') {
+  if (mode === 'increment') return `project-${index + 1}`;
+
+  // random: prefer crypto.randomUUID if available in the environment,
+  // fallback to a compact random string
+  // Note: crypto.randomUUID is supported in modern browsers & Node 18+.
+
+  const anyCrypto = typeof crypto !== 'undefined' ? (crypto as any) : undefined;
+  if (anyCrypto && typeof anyCrypto.randomUUID === 'function') {
+    return String(anyCrypto.randomUUID());
+  }
+
+  return `project-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function getDummyProjects(mode: 'increment' | 'random' = 'increment') {
+  return rawProjects.map((p, i) => ({ ...p, id: generateId(i, mode) }));
+}
+
+export const dummyProjects = getDummyProjects();

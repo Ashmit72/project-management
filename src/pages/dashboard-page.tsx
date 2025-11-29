@@ -2,6 +2,7 @@ import ProjectCard from '@/components/dashboard/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { dummyProjects } from '@/lib/dummyData';
 import { PlusIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const DashboardPage = () => {
   return (
@@ -11,14 +12,18 @@ const DashboardPage = () => {
           <h2 className="text-2xl font-bold text-fg-primary">Projects</h2>
           <p>Manage and track your projects</p>
         </div>
-        <Button className="ml-auto">
-          <PlusIcon />
-          Create Project
+        <Button className="ml-auto" asChild>
+          <Link to={'/projects/create'}>
+            <PlusIcon />
+            Create Project
+          </Link>
         </Button>
       </div>
       <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
         {dummyProjects.map(project => (
-          <ProjectCard {...project} />
+          <Link to={`/projects/${project.id}`}>
+            <ProjectCard {...project} />
+          </Link>
         ))}
       </div>
     </div>

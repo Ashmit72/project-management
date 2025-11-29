@@ -13,6 +13,8 @@ import { OfflineDetector } from '@/components/OfflineDetcetor';
 import { ResetpasswordPage } from '@/pages/reset-password-page';
 import DashboardPage from '@/pages/dashboard-page';
 import SettingsPage from './pages/settings-page';
+import CreateProjectPage from './pages/projects/create-project-page';
+import ProjectBoardPage from './pages/projects/project-board-page';
 
 console.log(import.meta.env.VITE_BACKEND_URL);
 
@@ -27,6 +29,19 @@ const router = createBrowserRouter([
           {
             index: true,
             Component: DashboardPage,
+          },
+          {
+            path: 'projects',
+            children: [
+              {
+                path: 'create',
+                Component: CreateProjectPage,
+              },
+              {
+                path: ':projectId',
+                Component: ProjectBoardPage,
+              },
+            ],
           },
           {
             path: '/settings',
