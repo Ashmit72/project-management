@@ -37,6 +37,10 @@ pipeline {
       steps {
         echo "Checking out code"
         checkout scm
+        script {
+          env.GIT_COMMIT_MSG = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+          env.GIT_AUTHOR_NAME = sh(script: "git log -1 --pretty=format:'%an'", returnStdout: true).trim()
+        }
       }
     }
 
@@ -76,6 +80,8 @@ pipeline {
           "fields": [
             { "name": "Job", "value": "${env.JOB_NAME}", "inline": true },
             { "name": "Build", "value": "#${env.BUILD_NUMBER}", "inline": true },
+            { "name": "Commit", "value": "${env.GIT_COMMIT_MSG}" },
+            { "name": "Author", "value": "${env.GIT_AUTHOR_NAME}" },
             { "name": "URL", "value": "${env.BUILD_URL}" }
           ]
         }
@@ -94,6 +100,8 @@ pipeline {
           "fields": [
             { "name": "Job", "value": "${env.JOB_NAME}", "inline": true },
             { "name": "Build", "value": "#${env.BUILD_NUMBER}", "inline": true },
+            { "name": "Commit", "value": "${env.GIT_COMMIT_MSG}" },
+            { "name": "Author", "value": "${env.GIT_AUTHOR_NAME}" },
             { "name": "URL", "value": "${env.BUILD_URL}" }
           ]
         }
