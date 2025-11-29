@@ -5,6 +5,7 @@ import {
   type AvatarFallbackProps,
   type AvatarProps,
 } from '@/components/ui/avatar';
+import type { ProjectMember } from '@/lib/types/projectTypes';
 import { cn } from '@/lib/utils';
 
 // Utility function to get the initials of a name
@@ -23,7 +24,7 @@ export function getInitials(name: string) {
 type AvatarGroupProps = AvatarProps & {
   size?: string;
   avatarFallbackProps?: AvatarFallbackProps;
-  avatars: { name: string; image: string }[];
+  avatars: ProjectMember[];
   avatarsCount?: number;
 };
 
