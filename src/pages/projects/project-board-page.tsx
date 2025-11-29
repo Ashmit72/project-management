@@ -20,7 +20,7 @@ export default function ProjectBoardPage() {
   });
 
   // use this to render columns
-  const { data: board, isPending: isLoadingBoard } = useQuery({
+  const { data: board } = useQuery({
     enabled: !!projectId,
     select: res => res.data,
     queryKey: ['projects', projectId, 'board'],
