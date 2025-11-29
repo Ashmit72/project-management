@@ -5,8 +5,8 @@ import {
   useNavigate,
   useLocation,
 } from 'react-router-dom';
-import Loading from './components/Loading';
-import { authClient } from './lib/authClient';
+import { DashboardLoading } from '@/helpers/DashboardLoading';
+import { authClient } from '@/lib/authClient';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -113,7 +113,7 @@ const AppLayout = () => {
     );
   };
 
-  if (isPending) return <Loading overlay />;
+  if (isPending) return <DashboardLoading />;
   if (!data) return <Navigate to={'/auth/signin'} replace />;
 
   return (

@@ -9,7 +9,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
 import AuthLayout from '@/layouts/AuthLayout';
 import RootProvider from '@/providers/RootProvider';
-import { OfflineDetector } from '@/components/OfflineDetcetor';
+import { OfflineDetector } from '@/helpers/OfflineDetcetor';
 import { ResetpasswordPage } from '@/pages/reset-password-page';
 import DashboardPage from '@/pages/dashboard-page';
 import SettingsPage from './pages/settings-page';
