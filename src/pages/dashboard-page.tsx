@@ -2,16 +2,10 @@ import ProjectCard from '@/components/dashboard/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { apiBase } from '@/lib/api';
+import type { ProjectCardType } from '@/lib/types/projectTypes';
 import { useQuery } from '@tanstack/react-query';
 import { PlusIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-type ProjectCardType = {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: string;
-};
 
 const DashboardPage = () => {
   const { data, isPending } = useQuery<ProjectCardType[]>({

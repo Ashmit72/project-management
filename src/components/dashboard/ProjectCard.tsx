@@ -6,15 +6,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type { ProjectCardProps } from '@/lib/types/projectTypes';
 import { formatDate } from 'date-fns';
 import { CalendarIcon, MoreVertical } from 'lucide-react';
-
-export type ProjectCardProps = {
-  name: string;
-  description: string;
-  createdAt: string;
-  members?: { name: string; image: string }[];
-};
 
 export default function ProjectCard(props: ProjectCardProps) {
   const { name, description, createdAt, members } = props;
