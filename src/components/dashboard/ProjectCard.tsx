@@ -6,22 +6,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { formatDate } from 'date-fns';
 import { CalendarIcon, MoreVertical } from 'lucide-react';
-
-export const people = [
-  {
-    name: 'Noah Brooks',
-    image: 'https://avatar.iran.liara.run/public/18',
-  },
-  {
-    name: 'Liam Reed',
-    image: 'https://avatar.iran.liara.run/public/32',
-  },
-  {
-    name: 'Ethan Cole',
-    image: 'https://avatar.iran.liara.run/public/25',
-  },
-];
 
 export type ProjectCardProps = {
   name: string;
@@ -32,6 +18,9 @@ export type ProjectCardProps = {
 
 export default function ProjectCard(props: ProjectCardProps) {
   const { name, description, createdAt, members } = props;
+  const formattedCreatedAt = createdAt
+    ? formatDate(createdAt, 'MMM dd, yyyy')
+    : null;
   return (
     <div className="flex flex-col gap-3 p-4 transition-colors border rounded-md cursor-pointer hover:border-primary-border">
       <div className="flex items-center gap-2">
@@ -49,17 +38,21 @@ export default function ProjectCard(props: ProjectCardProps) {
       </div>
       <p className="flex-1 text-sm text-fg-secondary">{description}</p>
       <div className="flex items-center justify-between">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-2 text-fg-tertiary">
-              <CalendarIcon size={14} />
-              <span className="text-xs ">{createdAt}</span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent withArrow side="bottom">
-            This project was created on {createdAt}
-          </TooltipContent>
-        </Tooltip>
+        {formattedCreatedAt ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2 text-fg-tertiary">
+                <CalendarIcon size={14} />
+                <span className="text-xs ">{formattedCreatedAt}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent withArrow side="bottom">
+              This project was created on {formattedCreatedAt}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <div></div>
+        )}
         {members && (
           <AvatarGroup
             avatars={members}
