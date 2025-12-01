@@ -35,26 +35,31 @@ const router = createBrowserRouter([
           },
           {
             path: 'projects',
-            middleware: [
-              ({ params }) => {
-                if (!params.projectId) throw redirect('/');
-              },
-            ],
             children: [
               {
                 path: 'create',
                 Component: CreateProjectPage,
               },
               {
-                path: ':projectId',
+                path: '',
+                middleware: [
+                  ({ params }) => {
+                    if (!params.projectId) throw redirect('/');
+                  },
+                ],
                 children: [
                   {
-                    index: true,
-                    Component: ProjectBoardPage,
-                  },
-                  {
-                    path: 'members',
-                    Component: MembersPage,
+                    path: ':projectId',
+                    children: [
+                      {
+                        index: true,
+                        Component: ProjectBoardPage,
+                      },
+                      {
+                        path: 'members',
+                        Component: MembersPage,
+                      },
+                    ],
                   },
                 ],
               },
