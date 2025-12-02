@@ -1,3 +1,4 @@
+import InvitationsHistoryTab from '@/components/projects/members/InvitationsHistoryTab';
 import MembersTab from '@/components/projects/members/MembersTab';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -34,7 +35,7 @@ export default function MembersPage() {
           <MembersTab />
         </TabsContent>
         <TabsContent value="invitations">
-          Change your password here.
+          <InvitationsHistoryTab />
         </TabsContent>
       </Tabs>
     </div>

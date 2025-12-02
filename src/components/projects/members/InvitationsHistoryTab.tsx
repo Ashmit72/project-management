@@ -1,0 +1,166 @@
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { apiBase } from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
+import { useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+type Invitation = {
+  id: string;
+  email: string;
+  role: { id: string; name: string };
+  status: 'accepted' | 'pending' | 'expired';
+  createdAt: string;
+  expiresAt: string | null;
+  invitedByUser: {
+    id: string;
+    name: string;
+    email: string;
+  };
+};
+
+export default function InvitationsHistoryTab() {
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [selectedInvite, setSelectedInvite] = useState<Invitation | null>(null);
+
+  const { projectId } = useParams();
+  const { data, isPending } = useQuery({
+    queryKey: ['projects', projectId, 'invitations-history'],
+    queryFn: async () => {
+      const res = await apiBase.get<Invitation[]>(`/${projectId}/invitations`);
+      return res.data;
+    },
+  });
+
+  const filtered = useMemo(() => {
+    return (
+      data
+        ?.filter(item => {
+          if (!search) return true;
+          return item.email.toLowerCase().includes(search.toLowerCase());
+        })
+        .filter(item => {
+          if (filterStatus === 'all') return true;
+          return item.status === filterStatus;
+        }) || []
+    );
+  }, [search, filterStatus, data]);
+
+  return (
+    <div className="p-4 mt-4 space-y-6 border rounded-md">
+      {/* Header */}
+      <div>
+        <h1 className="text-lg font-semibold">Invitations History</h1>
+        <p className="text-sm text-muted-foreground">
+          All invitations sent for this project.
+        </p>
+      </div>
+
+      {/* Search + Filters */}
+      <div className="flex items-center gap-3">
+        <Input
+          placeholder="Search by email..."
+          className="w-64"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+
+        <Select value={filterStatus} onValueChange={v => setFilterStatus(v)}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="accepted">Accepted</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="expired">Expired</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Table */}
+      {isPending ? (
+        <div className="flex items-center justify-center w-full h-60">
+          <Spinner />
+        </div>
+      ) : (
+        <Table className="border rounded-md">
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Invited By</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Expires At</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {filtered.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="py-6 text-center text-muted-foreground"
+                >
+                  No invitations found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((item, index) => (
+                <TableRow key={item.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{item.email}</TableCell>
+                  <TableCell>{item.role.name}</TableCell>
+                  <TableCell>
+                    <Badge
+                      color={
+                        item.status === 'accepted'
+                          ? 'success'
+                          : item.status === 'pending'
+                            ? 'warning'
+                            : item.status === 'expired'
+                              ? 'error'
+                              : 'neutral'
+                      }
+                    >
+                      {item.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{item.invitedByUser.name}</TableCell>
+                  <TableCell>
+                    {item.createdAt
+                      ? formatDistanceToNow(item.createdAt, { addSuffix: true })
+                      : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {item.expiresAt ? formatDistanceToNow(item.expiresAt) : '—'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      )}
+    </div>
+  );
+}
