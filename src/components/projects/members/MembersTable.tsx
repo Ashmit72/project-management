@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { Member } from '@/lib/types/memberTypes';
+import type { Role } from '@/lib/types/roleTypes';
 import { cn } from '@/lib/utils';
 import {
   type ColumnDef,
@@ -85,6 +86,16 @@ const columns: ColumnDef<Member>[] = [
       );
     },
     size: 250,
+  },
+  {
+    header: 'Role',
+    accessorKey: 'role',
+    cell: ({ row }) => {
+      const role = row.getValue('role') as Role;
+      return (
+        <p className="text-sm font-normal text-fg-secondary">{role.name}</p>
+      );
+    },
   },
   {
     header: 'Joined',
