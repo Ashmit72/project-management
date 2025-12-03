@@ -23,7 +23,7 @@ export const NavigationItem = ({
   return (
     <NavLink to={path}>
       {({ isActive }) => (
-        <SidebarMenuItem className={isActive ? 'bg-fill3' : ''}>
+        <SidebarMenuItem className={isActive ? 'bg-fill3 rounded-md' : ''}>
           <SidebarMenuButton>
             <Icon />
             <span>{label}</span>

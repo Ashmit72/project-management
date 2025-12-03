@@ -1,5 +1,6 @@
 import AvatarGroup from '@/components/ui/avatar-group';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import {
   DndContext,
   useDraggable,
@@ -18,6 +19,7 @@ import { EllipsisVertical, PlusIcon, UserRoundPlusIcon } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { useState } from 'react';
+import CreateTaskForm from '@/components/projects/CreateTaskForm';
 
 export default function ProjectBoardPage() {
   const { projectId } = useParams();
@@ -236,10 +238,17 @@ export default function ProjectBoardPage() {
                 <UserRoundPlusIcon size={25} />
               </IconButton>
             </div>
-            <Button>
-              <PlusIcon />
-              Create Task
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusIcon />
+                  Create Task
+                </Button>
+              </DialogTrigger>
+              <DialogContent backdrop="overlay">
+                <CreateTaskForm projectId={projectId!} />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
