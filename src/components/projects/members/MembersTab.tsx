@@ -7,7 +7,11 @@ import { useQuery } from '@tanstack/react-query';
 import { UserPlus } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
-export default function MembersTab() {
+export default function MembersTab({
+  openInviteModal,
+}: {
+  openInviteModal: VoidFunction;
+}) {
   const { data: session } = authClient.useSession();
   const { projectId } = useParams();
   const { data, isPending } = useQuery({
@@ -30,7 +34,7 @@ export default function MembersTab() {
             Manage who has access to this project.
           </p>
         </div>
-        <Button>
+        <Button onClick={openInviteModal}>
           <UserPlus />
           Invite
         </Button>

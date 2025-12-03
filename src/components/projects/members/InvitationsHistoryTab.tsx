@@ -38,7 +38,11 @@ type Invitation = {
   };
 };
 
-export default function InvitationsHistoryTab() {
+export default function InvitationsHistoryTab({
+  openInviteModal,
+}: {
+  openInviteModal: VoidFunction;
+}) {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
@@ -75,7 +79,7 @@ export default function InvitationsHistoryTab() {
             All invitations sent for this project.
           </p>
         </div>
-        <Button>
+        <Button onClick={openInviteModal}>
           <UserPlus />
           Invite
         </Button>
