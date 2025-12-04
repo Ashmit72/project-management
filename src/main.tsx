@@ -35,6 +35,10 @@ const router = createBrowserRouter([
             Component: DashboardPage,
           },
           {
+            path: 'invitations/accept',
+            Component: InvitationAcceptPage,
+          },
+          {
             path: 'projects',
             children: [
               {
@@ -95,10 +99,6 @@ const router = createBrowserRouter([
             Component: ResetpasswordPage,
           },
         ],
-      },
-      {
-        path: 'invitations/accept',
-        Component: InvitationAcceptPage,
       },
       {
         path: '*',

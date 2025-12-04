@@ -39,17 +39,13 @@ export function SignupPage() {
   }, [form, invitationEmail]);
 
   useEffect(() => {
-    if (
-      invitation &&
-      inviteToken &&
-      invitation.requiresRegistration === false
-    ) {
+    if (invitation && invitation.requiresRegistration === false) {
       navigate(
         `/auth/signin?email=${encodeURIComponent(invitation.email)}&inviteToken=${inviteToken}`,
         { replace: true }
       );
     }
-  }, [invitation, inviteToken, navigate]);
+  }, [invitation]);
 
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-bg px-5 py-10">

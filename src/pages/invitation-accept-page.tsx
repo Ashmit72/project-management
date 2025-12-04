@@ -1,13 +1,13 @@
 import { InvitationBanner } from '@/components/auth/InvitationBanner';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { authClient } from '@/lib/authClient';
-import { apiBase } from '@/lib/api';
 import { useInvitationDetails } from '@/hooks/useInvitationDetails';
+import { apiBase } from '@/lib/api';
+import { authClient } from '@/lib/authClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { LogOut, Sparkles } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export function InvitationAcceptPage() {
@@ -34,37 +34,6 @@ export function InvitationAcceptPage() {
   const loggedInEmail = session?.user?.email || null;
   const emailsMismatch =
     !!loggedInEmail && !!inviteEmail && loggedInEmail !== inviteEmail;
-
-  useEffect(() => {
-    if (!inviteToken) {
-      navigate('/auth/signin', { replace: true });
-    }
-  }, [inviteToken, navigate]);
-
-  useEffect(() => {
-    // If user is NOT logged in but the invite is valid and there is no mismatch,
-    // guide them straight into the correct auth flow.
-    if (
-      !isLoading &&
-      !loggedInEmail &&
-      invitation &&
-      inviteToken &&
-      !emailsMismatch
-    ) {
-      const target = invitation.requiresRegistration
-        ? `/auth/signup?inviteToken=${inviteToken}`
-        : `/auth/signin?inviteToken=${inviteToken}`;
-
-      navigate(target, { replace: true });
-    }
-  }, [
-    loggedInEmail,
-    emailsMismatch,
-    invitation,
-    inviteToken,
-    isLoading,
-    navigate,
-  ]);
 
   const handleContinueAsCurrentUser = () => {
     navigate('/', { replace: true });
@@ -115,8 +84,10 @@ export function InvitationAcceptPage() {
   const showContentCard =
     !isInvitationLoading && (!!invitation || isInvitationError || !inviteToken);
 
+  if (!inviteToken) return <Navigate to="/auth/signin" replace />;
+
   return (
-    <div className="min-h-screen w-full flex justify-center items-center bg-bg px-5 py-10">
+    <div className="w-full flex justify-center items-center bg-bg px-5 py-10">
       <div className="w-full max-w-xl">
         <div className="flex flex-col gap-6 rounded-2xl border border-soft bg-elevated p-6 shadow-soft">
           <div className="flex items-center gap-3">
