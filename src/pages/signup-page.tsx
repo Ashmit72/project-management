@@ -49,7 +49,7 @@ export function SignupPage() {
 
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-bg px-5 py-10">
-      <div className="w-full max-w-xl flex bg-bg">
+      <div className="w-100 max-w-xl flex bg-bg">
         <div className="flex-1 flex flex-col gap-8">
           <div className="flex flex-col gap-6">
             <Logo />
