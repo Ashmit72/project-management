@@ -15,9 +15,13 @@ import { Spinner } from '@/components/ui/spinner';
 import { apiBase } from '@/lib/api';
 import type { BoardColumn, Project } from '@/lib/types/projectTypes';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { EllipsisVertical, PlusIcon, UserRoundPlusIcon } from 'lucide-react';
+import {
+  Bookmark,
+  EllipsisVertical,
+  PlusIcon,
+  UserRoundPlusIcon,
+} from 'lucide-react';
 import { useParams } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
 import { useState } from 'react';
 import CreateTaskForm from '@/components/projects/CreateTaskForm';
 
@@ -140,8 +144,6 @@ export default function ProjectBoardPage() {
   const handleDragCancel = () => {
     setActiveId(null);
   };
-
-  console.log(board);
 
   if (isLoadingProject || isLoadingBoard) return <Spinner />;
 
@@ -271,12 +273,14 @@ export default function ProjectBoardPage() {
           <div
             className={`${getTicketColor(activeColumn.name)} rounded-xl p-3 w-68 flex flex-col gap-1 shadow-lg opacity-90 cursor-grabbing ring-2 ${getRingColor(activeColumn.name)}`}
           >
-            <h3 className="text-sm">{activeTask.title}</h3>
-            <p className="text-sm text-fg-secondary font-medium">
-              {format(parseISO(activeTask.dueDate), 'PPP')}
-            </p>
-            <Badge color={getMenuColors(activeColumn.name)} variant="soft">
-              {activeTask.status.name}
+            <h3 className="text-sm mb-2">{activeTask.title}</h3>
+            <Badge
+              color={getMenuColors(activeColumn.name)}
+              variant="soft"
+              size={'20'}
+            >
+              <Bookmark />
+              {activeTask.key}
             </Badge>
           </div>
         ) : null}
@@ -317,7 +321,7 @@ function DroppableColumn({
     >
       <section className="flex items-center justify-between">
         <h2 className="text-base font-medium truncate text-black-inverse px-3">
-          {column.name}
+          {column.name} {column.tasks.length}
         </h2>
         <IconButton
           size="28"
@@ -366,12 +370,10 @@ function DraggableTask({ task, columnName, getTicketColor, getMenuColors }) {
         isDragging ? 'opacity-50' : 'opacity-100'
       } transition-opacity`}
     >
-      <h3 className="text-sm">{task.title}</h3>
-      <p className="text-sm text-fg-secondary font-medium">
-        {format(parseISO(task.dueDate), 'PPP')}
-      </p>
-      <Badge color={getMenuColors(columnName)} variant="soft">
-        {task.status.name}
+      <h3 className="text-sm mb-2">{task.title}</h3>
+      <Badge color={getMenuColors(columnName)} variant="soft" size={'20'}>
+        <Bookmark />
+        {task.key}
       </Badge>
     </div>
   );

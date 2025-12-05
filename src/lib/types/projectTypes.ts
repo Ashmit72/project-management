@@ -30,6 +30,7 @@ export type BoardColumn = {
 export type BoardTask = {
   id: string;
   title: string;
+  key: string;
   dueDate: string;
   status: TaskStatus;
 };
