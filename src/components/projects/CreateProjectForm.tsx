@@ -3,6 +3,7 @@ import { Divider } from '@/components/ui/divider';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -10,7 +11,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { TextArea } from '@/components/ui/text-area';
+import { generateProjectKey } from '@/lib/generateProjectKey';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
@@ -18,6 +21,15 @@ import { z } from 'zod';
 export const FormSchema = z.object({
   name: z.string().trim().nonempty('Project name is required'),
   description: z.string().optional(),
+  key: z
+    .string()
+    .max(5, {
+      error: 'Key cannot be more than 5 characters',
+    })
+    .regex(/^[A-Z0-9]+$/, {
+      error: 'Key can only contain uppercase letters and numbers',
+    })
+    .optional(),
 });
 
 export type CreateProjectFormValues = z.infer<typeof FormSchema>;
@@ -36,8 +48,25 @@ const CreateProjectForm = ({
     defaultValues: {
       name: '',
       description: '',
+      key: '',
     },
   });
+
+  useEffect(() => {
+    const cb = form.subscribe({
+      name: 'name',
+      formState: {
+        values: true,
+      },
+      callback: ({ values }) => {
+        form.setValue('key', generateProjectKey(values.name));
+        form.clearErrors('key');
+      },
+    });
+
+    return () => cb();
+  }, [form.subscribe]);
+
   return (
     <div className="w-full mt-[15%]">
       <div className="max-w-md gap-6 p-4 mx-auto border rounded-md">
@@ -78,6 +107,28 @@ const CreateProjectForm = ({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="key"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Key</FormLabel>
+                      <FormControl>
+                        <Input
+                          size="36"
+                          type="text"
+                          {...field}
+                          placeholder="e.g. SR"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This project key will be used to prefix all tasks in the
+                        project. E.g. SR-123
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
