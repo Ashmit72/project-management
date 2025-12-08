@@ -17,7 +17,7 @@ export type ProjectCardProps = Pick<
   projectKey: string;
 };
 
-export type ProjectMember = { name: string; image: string };
+export type ProjectMember = { name: string; image: string | null };
 
 export type BoardColumn = {
   id: string;

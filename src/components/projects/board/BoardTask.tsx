@@ -7,9 +7,11 @@ import { Bookmark } from 'lucide-react';
 export function BoardTask({
   task,
   columnName,
+  onClick,
 }: {
   task: BoardTask;
   columnName: string;
+  onClick?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -29,6 +31,7 @@ export function BoardTask({
       columnName={columnName}
       ref={setNodeRef}
       style={style}
+      onClick={onClick}
       {...listeners}
       {...attributes}
     />
@@ -39,15 +42,28 @@ type BoardTaskBaseProps = {
   task: BoardTask;
   columnName: string;
   isDragging: boolean;
+  onClick?: () => void;
 } & Record<string, any>;
 
 export function BoardTaskBase(props: BoardTaskBaseProps) {
-  const { task, columnName, isDragging, ...rest } = props;
+  const { task, columnName, isDragging, onClick, ...rest } = props;
+
+  // Handle click - dnd-kit should allow clicks when not dragging
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't trigger click if we're currently dragging
+    if (isDragging) return;
+
+    // Stop propagation to avoid conflicts
+    e.stopPropagation();
+    onClick?.();
+  };
+
   return (
     <div
-      className={`${getTicketColor(columnName)} rounded-xl p-3 w-full flex flex-col gap-1 cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-50' : 'opacity-100'
+      className={`${getTicketColor(columnName)} rounded-xl p-3 w-full flex flex-col gap-1 cursor-pointer ${
+        isDragging ? 'opacity-50 cursor-grabbing' : 'opacity-100'
       } transition-opacity`}
+      onClick={handleClick}
       {...rest}
     >
       <h3 className="text-sm mb-2">{task.title}</h3>

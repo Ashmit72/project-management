@@ -4,7 +4,13 @@ import { useDroppable } from '@dnd-kit/core';
 import { BoardTask } from './BoardTask';
 import ColumnHeader from './ColumnHeader';
 
-export function Column({ column }: { column: BoardColumn }) {
+export function Column({
+  column,
+  onTaskClick,
+}: {
+  column: BoardColumn;
+  onTaskClick?: (taskId: string) => void;
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
 
   return (
@@ -17,7 +23,12 @@ export function Column({ column }: { column: BoardColumn }) {
       <ColumnHeader column={column} />
       <div className="flex flex-col gap-3">
         {column.tasks.map(task => (
-          <BoardTask key={task.id} task={task} columnName={column.name} />
+          <BoardTask
+            key={task.id}
+            task={task}
+            columnName={column.name}
+            onClick={() => onTaskClick?.(task.id)}
+          />
         ))}
       </div>
     </div>

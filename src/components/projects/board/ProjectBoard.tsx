@@ -8,12 +8,14 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BoardTaskBase } from './BoardTask';
 import DndProvider from './DndProvider';
+import { TaskDetailModal } from './TaskDetailModal';
 
 export default function ProjectBoard() {
   const { projectId } = useParams();
 
   const queryClient = useQueryClient();
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { data: board, isPending: isLoadingBoard } = useQuery({
     enabled: !!projectId,
@@ -123,7 +125,11 @@ export default function ProjectBoard() {
           style={{ alignItems: 'flex-start' }}
         >
           {board?.map(column => (
-            <Column key={column.id} column={column} />
+            <Column
+              key={column.id}
+              column={column}
+              onTaskClick={taskId => setSelectedTaskId(taskId)}
+            />
           ))}
         </div>
 
@@ -137,6 +143,15 @@ export default function ProjectBoard() {
           ) : null}
         </DragOverlay>
       </DndProvider>
+      <TaskDetailModal
+        taskId={selectedTaskId}
+        open={!!selectedTaskId}
+        onOpenChange={open => {
+          if (!open) {
+            setSelectedTaskId(null);
+          }
+        }}
+      />
     </>
   );
 }
