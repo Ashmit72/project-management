@@ -413,7 +413,7 @@ export function TaskDetailModal({
 
               {/* Sidebar Column (1/3 width) */}
               <div className="flex flex-col gap-4 lg:col-span-1">
-                Audit logs
+                Activities
               </div>
             </div>
           ) : null}
