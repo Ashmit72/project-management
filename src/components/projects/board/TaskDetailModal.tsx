@@ -78,7 +78,7 @@ export function TaskDetailModal({
 
   // Fetch task details
   const { data: task, isLoading } = useQuery<TaskDetail>({
-    staleTime: 1000 * 60 * 5, // 5 mins
+    // staleTime: 1000 * 60 * 5, // 5 mins
     queryKey: ['tasks', projectId, taskId],
     queryFn: async () => {
       const response = await apiBase.get<TaskDetail>(
