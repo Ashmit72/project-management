@@ -16,6 +16,7 @@ import { authClient } from '@/lib/authClient';
 import { ListCollapse } from 'lucide-react';
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import AppSidebar from './components/AppSidebar';
+import SocketProvider from './providers/SocketProvider';
 
 const AppLayout = () => {
   const { data, isPending } = authClient.useSession();
@@ -79,20 +80,22 @@ const AppLayout = () => {
     );
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="overflow-y-auto">
-        <header className="sticky top-0 z-10 flex items-center gap-2 p-4 border-b">
-          <SidebarTrigger>
-            <ListCollapse size={20} />
-          </SidebarTrigger>
-          {getBreadcrumbs()}
-        </header>
-        <main className="p-6">
-          <Outlet />
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <SocketProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="overflow-y-auto">
+          <header className="sticky top-0 z-10 flex items-center gap-2 p-4 border-b">
+            <SidebarTrigger>
+              <ListCollapse size={20} />
+            </SidebarTrigger>
+            {getBreadcrumbs()}
+          </header>
+          <main className="p-6">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </SocketProvider>
   );
 };
 
