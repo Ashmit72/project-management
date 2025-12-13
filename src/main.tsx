@@ -22,6 +22,7 @@ import CreateProjectPage from './pages/projects/create-project-page';
 import ProjectBoardPage from './pages/projects/project-board-page';
 import MembersPage from './pages/projects/members/members-page';
 import { lazy } from 'react';
+import ProjectProvider from './providers/ProjectProvider';
 
 const ProfilePage = lazy(() => import('./pages/profile-page'));
 
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
               },
               {
                 path: ':projectId',
+                Component: ProjectProvider,
                 children: [
                   {
                     index: true,
