@@ -382,6 +382,7 @@ export function TaskDetailModal({
                   </h3>
 
                   <Tiptap
+                    placeholder="Add a description..."
                     content={task.description}
                     onBlur={({ editor }) =>
                       saveFieldChange('description', editor.getHTML())

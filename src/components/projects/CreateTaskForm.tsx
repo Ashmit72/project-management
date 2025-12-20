@@ -109,6 +109,8 @@ const CreateTaskForm = ({
                       <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Tiptap
+                          classNames={'!max-h-60'}
+                          placeholder="Add a description for this task..."
                           onUpdate={({ editor }) =>
                             field.onChange(editor.getHTML())
                           }
