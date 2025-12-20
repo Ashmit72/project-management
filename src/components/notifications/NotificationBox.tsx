@@ -6,7 +6,7 @@ import {
   notificationTypeToTitle,
 } from '@/lib/notificationTypeMap';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDate, formatDistanceToNow } from 'date-fns';
 import { Bell } from 'lucide-react';
 import { apiBase } from '@/lib/api';
 import {
@@ -33,7 +33,17 @@ const getNotificationMessage = (notification: Notification): string => {
     case 'TASK_STATUS_CHANGED':
       return `${actor?.name} changed the status of "${task?.title}".`;
     case 'TASK_DUE_DATE_CHANGED':
-      return `Due date for "${task?.title}" changed from ${payload.old} to ${payload.new}`;
+      const oldDate = payload?.old
+        ? formatDate(payload.old as string, 'MMM d, yyyy')
+        : null;
+      const newDate = payload?.new
+        ? formatDate(payload.new as string, 'MMM d, yyyy')
+        : null;
+
+      if (oldDate && !newDate) {
+        return `${actor?.name} removed the due date of "${task?.title}".`;
+      }
+      return `${actor?.name} changed the due date of "${task?.title}" ${oldDate ? `from ${oldDate}` : ''} to ${newDate || 'no due date'}.`;
     case 'TASK_UPDATED':
       return `${actor?.name} updated the ${payload.field} for "${task?.title}"`;
 

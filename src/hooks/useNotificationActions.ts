@@ -4,8 +4,10 @@ import type {
 } from '@/lib/types/notificationTypes';
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import type { UnreadCountData } from './useNotificationsUnreadCount';
+import { apiBase } from '@/lib/api';
+import { noop } from '@/lib/noop';
 
-export default function useNotificationCacheActions() {
+export default function useNotificationActions() {
   const queryClient = useQueryClient();
 
   const addNewNotificationToList = (notification: Notification) => {
@@ -42,8 +44,17 @@ export default function useNotificationCacheActions() {
     );
   };
 
+  const readAll = async () => {
+    queryClient.setQueryData(['notifications', 'unread-count'], () => {
+      return { count: 0 };
+    });
+
+    await apiBase.get('/notifications/read-all').catch(noop);
+  };
+
   return {
     addNewNotificationToList,
     incrementUnreadCount,
+    readAll,
   };
 }

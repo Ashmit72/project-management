@@ -4,31 +4,27 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import useNotificationCacheActions from '@/hooks/useNotificationCacheActions';
+import useNotificationActions from '@/hooks/useNotificationActions';
 import useNotificationsUnreadCount from '@/hooks/useNotificationsUnreadCount';
 import useSocket from '@/hooks/useSocket';
 import { socket } from '@/lib/socket';
-import { useQueryClient } from '@tanstack/react-query';
 import { Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import NotificationBox from './notifications/NotificationBox';
 
 export function NotificationBell() {
-  const queryClient = useQueryClient();
   const { connected } = useSocket();
   const [isOpen, setIsOpen] = useState(false);
 
   const unreadCount = useNotificationsUnreadCount();
-  const { addNewNotificationToList, incrementUnreadCount } =
-    useNotificationCacheActions();
+  const { addNewNotificationToList, incrementUnreadCount, readAll } =
+    useNotificationActions();
 
-  const handleOpen = (state: boolean) => {
+  const handleOpenChange = (state: boolean) => {
     setIsOpen(state);
 
-    if (state === true) {
-      queryClient.setQueryData(['notifications', 'unread-count'], () => {
-        return { count: 0 };
-      });
+    if (unreadCount > 0) {
+      readAll();
     }
   };
 
@@ -48,7 +44,7 @@ export function NotificationBell() {
   }, [connected, isOpen]);
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
