@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { apiBase } from '@/lib/api';
+import { getNotificationTargetURL } from '@/lib/getNotificatonTargetUrl';
 import {
   notificationTypeToColor,
   notificationTypeToIcon,
@@ -8,7 +9,6 @@ import {
 } from '@/lib/notificationTypeMap';
 import {
   NotificationStatus,
-  type Notification,
   type NotificationsResponse,
 } from '@/lib/types/notificationTypes';
 import { cn } from '@/lib/utils';
@@ -20,21 +20,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { getInitials } from '../ui/avatar-group';
 import NotificationMessage from './NotificationMessage';
 
-const getNotificationTargetURL = (notification: Notification) => {
-  switch (notification.type) {
-    case 'PROJECT_INVITATION_RECEIVED':
-      return `/invitations/${notification.payload.invitationToken}`;
-
-    default:
-      return '#';
-  }
-};
-
 type Props = {
   isOpen: boolean;
+  close: VoidFunction;
 };
 
-export default function NotificationBox({ isOpen }: Props) {
+export default function NotificationBox({ isOpen, close }: Props) {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useInfiniteQuery<NotificationsResponse>({
       enabled: isOpen,
@@ -59,9 +50,6 @@ export default function NotificationBox({ isOpen }: Props) {
     });
 
   const notifications = data?.pages.flatMap(page => page.data) || [];
-  console.log('🚀 ~ NotificationBox ~ notifications:', notifications);
-  //   const pagination = data?.pagination;
-  console.log('🚀 ~ NotificationBell ~ notifications:', notifications);
 
   const unreadCount = notifications.filter(
     n => n.status !== NotificationStatus.READ
@@ -79,17 +67,6 @@ export default function NotificationBox({ isOpen }: Props) {
             </Badge>
           )}
         </div>
-        {/* {unreadCount > 0 && (
-                    <Button
-                        variant="ghost"
-                        size="28"
-                        onClick={markAllAsRead}
-                        className="h-7 text-xs hover:bg-fill2"
-                    >
-                        <CheckCheck className="h-3.5 w-3.5 mr-1" />
-                        Mark all read
-                    </Button>
-                )} */}
       </div>
 
       {/* Notifications List */}
@@ -120,6 +97,9 @@ export default function NotificationBox({ isOpen }: Props) {
               <Link
                 to={targetUrl}
                 key={notification.id}
+                onClick={() => {
+                  close();
+                }}
                 className={cn(
                   'group relative p-3 transition-all duration-200 hover:bg-fill1 flex border-l-3 border-l-transparent',
                   isUnread && ' border-l-primary'
@@ -165,17 +145,6 @@ export default function NotificationBox({ isOpen }: Props) {
                           addSuffix: true,
                         })}
                       </span>
-                      {/* {isUnread && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="28"
-                                                    onClick={() => markAsRead(notification.id)}
-                                                    className="h-6 text-xs px-2 hover:bg-fill2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    <Check className="h-3 w-3 mr-1" />
-                                                    Mark read
-                                                </Button>
-                                            )} */}
                     </div>
                   </div>
                 </div>
@@ -203,19 +172,6 @@ export default function NotificationBox({ isOpen }: Props) {
           )}
         </div>
       </div>
-
-      {/* Footer */}
-      {/* {notifications.length > 0 && (
-        <div className="px-4 py-3 border-t border-border/50 bg-fill1/50">
-          <Button
-            variant="ghost"
-            size="32"
-            className="w-full hover:bg-fill2 text-primary-text font-medium"
-          >
-            Load more
-          </Button>
-        </div>
-      )} */}
     </div>
   );
 }

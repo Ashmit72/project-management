@@ -67,7 +67,10 @@ export function NotificationBell() {
         className="w-[420px] p-0 shadow-xl border-border/80"
         sideOffset={12}
       >
-        <NotificationBox isOpen={isOpen} />
+        <NotificationBox
+          isOpen={isOpen}
+          close={() => handleOpenChange(false)}
+        />
       </PopoverContent>
     </Popover>
   );

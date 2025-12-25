@@ -1,5 +1,6 @@
 import type { Notification } from '@/lib/types/notificationTypes';
 import { formatDate } from 'date-fns';
+import TaskKeyBadge from '../TaskKeyBadge';
 
 export default function NotificationMessage({
   notification,
@@ -57,6 +58,12 @@ export default function NotificationMessage({
         <>
           {actor?.name} updated the {payload.field} for <b>{task?.title}</b>.
         </>
+      );
+    case 'TASK_CREATED':
+      return (
+        <div className="flex items-center gap-2">
+          {actor?.name} create a new task <TaskKeyBadge taskKey={task?.key} />
+        </div>
       );
     case 'PROJECT_INVITATION_RECEIVED':
       return (
