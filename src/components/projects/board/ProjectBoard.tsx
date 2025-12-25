@@ -4,6 +4,7 @@ import { apiBase } from '@/lib/api';
 import type { BoardColumn } from '@/lib/types/projectTypes';
 import { DragOverlay } from '@dnd-kit/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryState } from 'nuqs';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BoardTaskBase } from './BoardTask';
@@ -15,7 +16,7 @@ export default function ProjectBoard() {
 
   const queryClient = useQueryClient();
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useQueryState('task');
 
   const { data: board, isPending: isLoadingBoard } = useQuery({
     enabled: !!projectId,
