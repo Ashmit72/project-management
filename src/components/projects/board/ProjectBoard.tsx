@@ -80,9 +80,6 @@ export default function ProjectBoard() {
     return query?.isLoading || false;
   }, [selectedTaskId, taskQueries]);
 
-  console.log('Task Assignees Map: ', taskAssigneesMap);
-  console.log('Selected Task Detail: ', selectedTask);
-
   // Mutation to update task status
   const updateTaskMutation = useMutation({
     mutationFn: async ({
