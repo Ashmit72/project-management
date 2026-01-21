@@ -6,6 +6,13 @@ import {
   DropdownItem,
   DropdownTrigger,
 } from '@/components/ui/dropdown';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import {
   Table,
@@ -15,164 +22,66 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { usePermission } from '@/hooks/use-permission';
+import { apiBase } from '@/lib/api';
 import type { Member } from '@/lib/types/memberTypes';
 import type { Role } from '@/lib/types/roleTypes';
 import { cn } from '@/lib/utils';
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  Ellipsis,
-  Pen,
-  Settings,
-} from 'lucide-react';
-
-const columns: ColumnDef<Member>[] = [
-  // {
-  //   id: 'select',
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       size="sm"
-  //       className="flex items-center justify-start"
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && 'indeterminate')
-  //       }
-  //       onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       size="sm"
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={value => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   size: 28,
-  //   enableSorting: false,
-  // },
-  {
-    header: '#',
-    cell: ({ row }) => <div>{row.index + 1}</div>,
-    size: 20,
-  },
-  {
-    header: 'User',
-    accessorKey: 'user',
-    cell: ({ row }) => {
-      const userDetails = row.getValue('user') as Member['user'];
-      return (
-        <div className="flex items-center gap-3">
-          <Avatar rounded="square" size="36">
-            <AvatarImage src={userDetails.image} />
-            <AvatarFallback>{getInitials(userDetails.name)}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <p className="text-sm font-medium text-fg">{userDetails.name}</p>
-            <p className="text-xs font-normal text-fg-secondary">
-              {userDetails.email}
-            </p>
-          </div>
-        </div>
-      );
-    },
-    size: 250,
-  },
-  {
-    header: 'Role',
-    accessorKey: 'role',
-    cell: ({ row }) => {
-      const role = row.getValue('role') as Role;
-      return (
-        <p className="text-sm font-normal text-fg-secondary">{role.name}</p>
-      );
-    },
-  },
-  {
-    header: 'Joined',
-    accessorKey: 'createdAt',
-    cell: ({ row }) => {
-      const joinedAt = row.getValue('createdAt') as string;
-      return (
-        <p className="text-sm font-normal text-fg-secondary">
-          {formatDistanceToNow(joinedAt, {
-            addSuffix: true,
-          })}
-        </p>
-      );
-    },
-    size: 140,
-  },
-  {
-    header: 'Invited by',
-    accessorKey: 'inviteByUser',
-    cell: ({ row }) => {
-      const inviteBy = row.getValue('inviteByUser') as Member['inviteByUser'];
-      return (
-        <div className="flex items-center gap-1">
-          <Avatar size="32" className="border-2 border-bg hover:z-10">
-            <AvatarImage src={inviteBy.image} />
-            <AvatarFallback className="text-xs">
-              {getInitials(inviteBy.name)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <p className="text-sm text-fg-secondary">{inviteBy.name}</p>
-          </div>
-        </div>
-      );
-    },
-    size: 140,
-  },
-  {
-    header: 'Edit',
-    cell: () => {
-      return (
-        <Dropdown>
-          <DropdownTrigger className="flex items-center justify-center w-full">
-            <Ellipsis size={20} />
-          </DropdownTrigger>
-          <DropdownContent className="w-fit">
-            <DropdownItem>
-              <Pen />
-              Edit
-            </DropdownItem>
-            <DropdownItem>
-              <Settings />
-              Delete
-            </DropdownItem>
-          </DropdownContent>
-        </Dropdown>
-      );
-    },
-    size: 60,
-  },
-];
+import { ChevronDownIcon, ChevronUpIcon, Ellipsis, Trash2 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function MembersTable({
   members = [],
   isLoading,
+  loggedInUserId,
 }: {
   members?: Member[];
   loggedInUserId?: string;
   isLoading?: boolean;
 }) {
-  const table = useReactTable({
-    data: members,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    enableSortingRemoval: false,
+  const { projectId } = useParams();
+  const queryClient = useQueryClient();
+  const { can } = usePermission();
+  const canAssignRole = can('role:assign');
+
+  const { data: roles = [] } = useQuery({
+    queryKey: ['project', projectId, 'roles'],
+    queryFn: async () => {
+      const { data } = await apiBase.get<Role[]>(`/rbac/${projectId}/roles`);
+      return data;
+    },
+    enabled: !!projectId,
   });
+
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({
+      memberId,
+      roleId,
+    }: {
+      memberId: string;
+      roleId: string;
+    }) => {
+      await apiBase.put(`/rbac/${projectId}/members/${memberId}/role`, {
+        roleId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['projects', projectId, 'members'],
+      });
+      toast.success('Role updated successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update role');
+    },
+  });
+
+  const handleRoleChange = (memberId: string, roleId: string) => {
+    updateRoleMutation.mutate({ memberId, roleId });
+  };
 
   return (
     <div className="flex flex-col w-full gap-4 overflow-auto">
@@ -184,91 +93,123 @@ export default function MembersTable({
         ) : (
           <Table className="table-fixed">
             <TableHeader>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                  {headerGroup.headers.map(header => {
-                    return (
-                      <TableHead
-                        key={header.id}
-                        style={{ width: `${header.getSize()}px` }}
-                        className="h-11"
-                      >
-                        {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                          <div
-                            className={cn(
-                              header.column.getCanSort() &&
-                                'flex h-full cursor-pointer select-none items-center justify-between gap-2'
-                            )}
-                            onClick={header.column.getToggleSortingHandler()}
-                            onKeyDown={e => {
-                              if (
-                                header.column.getCanSort() &&
-                                (e.key === 'Enter' || e.key === ' ')
-                              ) {
-                                e.preventDefault();
-                                header.column.getToggleSortingHandler()?.(e);
-                              }
-                            }}
-                            tabIndex={
-                              header.column.getCanSort() ? 0 : undefined
-                            }
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                            {{
-                              asc: (
-                                <ChevronUpIcon
-                                  className="shrink-0 opacity-60"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              ),
-                              desc: (
-                                <ChevronDownIcon
-                                  className="shrink-0 opacity-60"
-                                  size={16}
-                                  aria-hidden="true"
-                                />
-                              ),
-                            }[header.column.getIsSorted() as string] ?? null}
-                          </div>
-                        ) : (
-                          flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )
-                        )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
+              <TableRow className="hover:bg-transparent">
+                <TableHead style={{ width: '40px' }} className="h-11">
+                  #
+                </TableHead>
+                <TableHead style={{ width: '250px' }} className="h-11">
+                  User
+                </TableHead>
+                <TableHead style={{ width: '180px' }} className="h-11">
+                  Role
+                </TableHead>
+                <TableHead style={{ width: '140px' }} className="h-11">
+                  Joined
+                </TableHead>
+                <TableHead style={{ width: '140px' }} className="h-11">
+                  Invited by
+                </TableHead>
+                <TableHead style={{ width: '60px' }} className="h-11">
+                  Actions
+                </TableHead>
+              </TableRow>
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map(row => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                  >
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+              {members?.length ? (
+                members.map((member, index) => {
+                  const isOwner = member.role?.name === 'Owner';
+                  const isSelf = member.user.id === loggedInUserId;
+
+                  return (
+                    <TableRow key={member.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar rounded="square" size="36">
+                            <AvatarImage src={member.user.image} />
+                            <AvatarFallback>
+                              {getInitials(member.user.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <p className="text-sm font-medium text-fg">
+                              {member.user.name}
+                            </p>
+                            <p className="text-xs font-normal text-fg-secondary">
+                              {member.user.email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {canAssignRole && !isOwner && !isSelf ? (
+                          <Select
+                            value={member.role?.id}
+                            onValueChange={roleId =>
+                              handleRoleChange(member.id, roleId)
+                            }
+                          >
+                            <SelectTrigger className="w-[150px]">
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {roles
+                                .filter(r => r.name !== 'Owner')
+                                .map(role => (
+                                  <SelectItem key={role.id} value={role.id}>
+                                    {role.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <p className="text-sm font-normal text-fg-secondary">
+                            {member.role?.name}
+                          </p>
                         )}
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                      <TableCell>
+                        <p className="text-sm font-normal text-fg-secondary">
+                          {formatDistanceToNow(member.createdAt, {
+                            addSuffix: true,
+                          })}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Avatar size="32" className="border-2 border-bg">
+                            <AvatarImage src={member.inviteByUser.image} />
+                            <AvatarFallback className="text-xs">
+                              {getInitials(member.inviteByUser.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <p className="text-sm text-fg-secondary">
+                            {member.inviteByUser.name}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Dropdown>
+                          <DropdownTrigger className="flex items-center justify-center w-full">
+                            <Ellipsis size={20} />
+                          </DropdownTrigger>
+                          <DropdownContent className="w-fit">
+                            <DropdownItem
+                              className="text-destructive"
+                              disabled={isOwner || isSelf}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remove
+                            </DropdownItem>
+                          </DropdownContent>
+                        </Dropdown>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
+                  <TableCell colSpan={6} className="h-24 text-center">
                     No results.
                   </TableCell>
                 </TableRow>
